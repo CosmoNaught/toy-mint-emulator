@@ -55,7 +55,6 @@ class GRU(nn.Module):
         x = self.softplus(x)
         return x
 
-    
 class LSTM(nn.Module):
     def __init__(self, input_size, hidden_size, output_size, dropout_prob):
         super(LSTM, self).__init__()
@@ -92,8 +91,6 @@ class BiRNN(nn.Module):
         x = self.fc(x.view(len(x), -1))
         x = self.softplus(x)
         return x
-
-
 
 # Neural Network Settings
 @dataclass
@@ -192,7 +189,6 @@ def train_and_evaluate(model, train_loader, val_loader, test_loader, device, cri
     
     return total_training_time, avg_train_data_load_time, avg_train_process_time, avg_val_data_load_time, avg_val_process_time, test_loss
 
-
 def predict(model, loader, device):
     predictions = []
     actual = []
@@ -220,7 +216,7 @@ def calculate_metrics(predictions, actual):
 def main():
     # Configuration and paths
     config = NeuralNetConfig()
-    csv_file_path = 'D:\\Malaria\\toy-mint-emulator\\data\\mint_data_scaled.csv'
+    csv_file_path = 'X:\Cosmo\projects\\toy-mint-emulator\\data\\mint_data_scaled.csv'
     results = []
 
     # Define your experimental setup
