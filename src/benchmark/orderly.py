@@ -217,10 +217,10 @@ def calculate_metrics(predictions, actual):
 def main():
     # Configuration and paths
     config = NeuralNetConfig()
-    csv_file_path = orderly.orderly_shared_resource({
+    csv_file = orderly.orderly_shared_resource({
         mint_data_scaled.csv : "mint_data_scaled.csv"})
     
-    dataframe = pd.read_csv(csv_file_path)
+    dataframe = pd.read_csv(csv_file)
 
     
     results = []
