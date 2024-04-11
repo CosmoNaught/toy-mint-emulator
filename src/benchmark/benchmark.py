@@ -1,5 +1,3 @@
-import os
-import csv
 import time
 import pandas as pd
 import numpy as np
@@ -74,7 +72,6 @@ class LSTM(nn.Module):
         x = self.fc(x.view(len(x), -1))
         x = self.softplus(x)
         return x
-
 
 class BiRNN(nn.Module):
     def __init__(self, input_size, hidden_size, output_size, dropout_prob):
@@ -217,12 +214,11 @@ def calculate_metrics(predictions, actual):
 def main():
     # Configuration and paths
     config = NeuralNetConfig()
-    csv_file = orderly.orderly_shared_resource({
-        mint_data_scaled.csv : "mint_data_scaled.csv"})
-    
-    dataframe = pd.read_csv(csv_file)
 
-    
+
+    dataframe = pd.read_pickle("data.pkl")
+    print("Data Loaded")
+
     results = []
 
     # Define your experimental setup
@@ -303,4 +299,6 @@ def main():
     print("Experiment results saved.")
 
 if __name__ == "__main__":
+    orderly.dependency(None, "latest(name == 'data')",
+                    {"data.pkl" : "data.pkl"}) 
     main()
