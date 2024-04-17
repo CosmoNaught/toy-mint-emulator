@@ -26,18 +26,18 @@ def main():
 
     # Define your experimental setup
     devices = ["cpu"]#, "cuda"]
-    worker_options = [1, 2, 4]#, 8]#[2**i for i in range(0, 4)]
-    epochs_options = [32, 64, 128]#[2**i for i in range(3, 8)]
-    batch_sizes = [64, 512, 4096]#[2**i for i in range(5, 15)]
-    targeted_training_sizes = [65536, 131072] #,262144,524288]#[2**i for i in range(9, 19)]
-    repetitions = 2
+    worker_options = [1]#, 2, 4]#, 8]#[2**i for i in range(0, 4)]
+    epochs_options = [16]#, 64, 128]#[2**i for i in range(3, 8)]
+    batch_sizes = [4096]#, 512, 4096]#[2**i for i in range(5, 15)]
+    targeted_training_sizes = [65536]#, 131072] #,262144,524288]#[2**i for i in range(9, 19)]
+    repetitions = 1
 
     # Mapping of neural network types to their classes
     net_classes = {
-        "FFNN": FFNN,
-        "GRU": GRU,
-        "LSTM": LSTM,
-        "BiRNN": BiRNN
+        "FFNN": FFNN
+        # "GRU": GRU,
+        # "LSTM": LSTM,
+        # "BiRNN": BiRNN
     }
 
     for device_name in devices:
