@@ -2,7 +2,7 @@ import sys
 
 def list_modules(snapshot, message):
     
-    '''This functions works out which libraries are essential for the
+    '''DEPRICATED: This functions works out which libraries are essential for the
     execution of the benchmarking tool'''
     
     current_modules = set(sys.modules.keys())
