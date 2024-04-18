@@ -24,20 +24,20 @@ def main():
 
     results = []
 
-    # Define your experimental setup
-    devices = ["cpu"]#, "cuda"]
-    worker_options = [1]#, 2, 4]#, 8]#[2**i for i in range(0, 4)]
-    epochs_options = [16]#, 64, 128]#[2**i for i in range(3, 8)]
-    batch_sizes = [4096]#, 512, 4096]#[2**i for i in range(5, 15)]
-    targeted_training_sizes = [65536]#, 131072] #,262144,524288]#[2**i for i in range(9, 19)]
-    repetitions = 1
+    # Define experimental setup
+    devices = ["cpu", "cuda"]
+    worker_options = [1, 2]#[2**i for i in range(0, 4)]
+    epochs_options = [8, 16]#[2**i for i in range(3, 8)]
+    batch_sizes = [1024, 2048]#[2**i for i in range(5, 15)]
+    targeted_training_sizes = [65536, 131072]#[2**i for i in range(9, 19)]
+    repetitions = 2
 
     # Mapping of neural network types to their classes
     net_classes = {
-        "FFNN": FFNN
-        # "GRU": GRU,
-        # "LSTM": LSTM,
-        # "BiRNN": BiRNN
+        "FFNN": FFNN,
+        "GRU": GRU,
+        "LSTM": LSTM,
+        "BiRNN": BiRNN
     }
 
     for device_name in devices:
@@ -48,9 +48,9 @@ def main():
                         for net_type in net_classes.keys():  # Added loop
                             for repetition in range(repetitions):
                                 device = torch.device(device_name if torch.cuda.is_available() else "cpu")
-                                config.num_workers = workers
                                 config.epochs = epochs
                                 config.batch_size = batch_size
+                                print(f"Now testing: {net_type}")
                                 print(config)
 
                                 # Adjust dataset loading based on the targeted training size
@@ -58,13 +58,13 @@ def main():
                                 val_size = int(training_size * config.val_pct / (1 - config.test_pct - config.val_pct))
                                 test_size = int(training_size * config.test_pct / (1 - config.test_pct - config.val_pct))
                                 total_size_needed = training_size + val_size + test_size
-                                # Optionally ensure your dataset is large enough or handle smaller datasets
+                                # Ensure dataset is large enough or handle smaller datasets
                                 dataset, _ = random_split(dataset, [total_size_needed, len(dataset) - total_size_needed])
 
                                 train_dataset, val_dataset, test_dataset = random_split(dataset, [training_size, val_size, test_size])
-                                train_loader = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=config.shuffle, num_workers=config.num_workers, pin_memory=True)
-                                val_loader = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=False, num_workers=config.num_workers, pin_memory=True)
-                                test_loader = DataLoader(test_dataset, batch_size=config.batch_size, shuffle=False, num_workers=config.num_workers, pin_memory=True)
+                                train_loader = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=config.shuffle, num_workers=workers, pin_memory=True)
+                                val_loader = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=False, num_workers=workers, pin_memory=True)
+                                test_loader = DataLoader(test_dataset, batch_size=config.batch_size, shuffle=False, num_workers=workers, pin_memory=True)
 
                                 # Instantiate the model based on the net type
                                 model_class = net_classes[net_type]
