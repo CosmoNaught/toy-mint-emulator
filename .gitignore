@@ -1,1 +1,5 @@
-data/*
+.outpack/
+archive/
+draft/
+shared/*
+.python-version
