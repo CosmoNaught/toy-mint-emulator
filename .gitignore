@@ -2,3 +2,4 @@
 archive/
 draft/
 shared/*
+.python-version

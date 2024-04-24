@@ -21,3 +21,7 @@ dependencies = [
 
 [tool.hatch.metadata]
 allow-direct-references = true
+
+[tool.hatch.envs.default]
+version = "3.11.9"
+

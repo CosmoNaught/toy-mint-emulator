@@ -2,6 +2,6 @@
 
 from outpack.init import outpack_init
 
-path = "X:\\Cosmo\\projects\\toy-mint-emulator"
+path = ""
 
 outpack_init(path)
