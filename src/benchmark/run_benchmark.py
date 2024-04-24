@@ -1,3 +1,4 @@
+import time
 import pandas as pd
 import numpy as np
 import torch
@@ -39,6 +40,10 @@ def main():
         "LSTM": LSTM,
         "BiRNN": BiRNN
     }
+    total_tests = len(devices) * len(thread_counts) * len(worker_counts) * len(epochs_options) * len(batch_sizes) * len(training_sizes) * len(net_classes) * repetitions
+    current_test = 0
+    
+    start_all_tests_time = time.time()  # Start timing all tests
 
     for num_threads in thread_counts:
         torch.set_num_threads(num_threads)
@@ -51,6 +56,8 @@ def main():
                         for training_size in training_sizes:
                             for net_type in net_classes.keys():
                                 for repetition in range(repetitions):
+                                    current_test += 1
+                                    start_test_time = time.time()
                                     device = torch.device(device_name if torch.cuda.is_available() else "cpu")
                                     config.epochs = epochs
                                     config.batch_size = batch_size
@@ -101,6 +108,10 @@ def main():
                                         "r2": r2
                                     })
                                     save_results(results)
+                                    current_test_duration = time.time() - start_test_time
+                                    total_elapsed_time = time.time() - start_all_tests_time
+                                    print(f"Test {current_test} of {total_tests} ended after {current_test_duration:.2f} seconds.")
+                                    print(f"Total time elapsed since first test: {total_elapsed_time:.2f} seconds.")
 
     # Optionally, save final results with a different name to indicate completion
     final_results_df = pd.DataFrame(results)
