@@ -2,7 +2,7 @@ import time
 import torch
 from tqdm import tqdm
 
-def train_and_evaluate(model, train_loader, val_loader, test_loader, device, criterion, optimizer, scheduler, config):
+def train_and_evaluate(model, train_loader, val_loader, test_loader, device, criterion, optimizer, scheduler, config, use_tqdm=True):
     start_time = time.time()  # Start timing the training process
 
     train_data_loading_times = []
@@ -10,11 +10,16 @@ def train_and_evaluate(model, train_loader, val_loader, test_loader, device, cri
     val_data_loading_times = []
     val_processing_times = []
 
-    for epoch in tqdm(range(config.epochs), desc='Training Progress'):
+    # Use tqdm only if use_tqdm is True
+    epochs_iterator = tqdm(range(config.epochs), desc='Training Progress') if use_tqdm else range(config.epochs)
+
+    for epoch in epochs_iterator:
         model.train()
         train_loss = 0
 
-        for data, target in tqdm(train_loader, desc=f'Epoch {epoch+1}/{config.epochs} - Training Data Loading', leave=False):
+        # Wrap the train_loader with tqdm conditionally
+        train_loader_iterator = tqdm(train_loader, desc=f'Epoch {epoch+1}/{config.epochs} - Training Data Loading', leave=False) if use_tqdm else train_loader
+        for data, target in train_loader_iterator:
             data_load_start = time.time()
             data, target = data.to(device), target.to(device)
             data_load_end = time.time()
@@ -35,8 +40,9 @@ def train_and_evaluate(model, train_loader, val_loader, test_loader, device, cri
 
         val_loss = 0
         model.eval()
+        val_loader_iterator = tqdm(val_loader, desc=f'Epoch {epoch+1}/{config.epochs} - Validation Data Loading', leave=False) if use_tqdm else val_loader
         with torch.no_grad():
-            for data, target in tqdm(val_loader, desc=f'Epoch {epoch+1}/{config.epochs} - Validation Data Loading', leave=False):
+            for data, target in val_loader_iterator:
                 data_load_start = time.time()
                 data, target = data.to(device), target.to(device)
                 data_load_end = time.time()
@@ -63,7 +69,8 @@ def train_and_evaluate(model, train_loader, val_loader, test_loader, device, cri
 
     test_loss = 0
     with torch.no_grad():
-        for data, target in tqdm(test_loader, desc='Testing Data Loading', leave=False):
+        test_loader_iterator = tqdm(test_loader, desc='Testing Data Loading', leave=False) if use_tqdm else test_loader
+        for data, target in test_loader_iterator:
             data, target = data.to(device), target.to(device)
             output = model(data)
             loss = criterion(output, target)
