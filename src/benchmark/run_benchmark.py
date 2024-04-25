@@ -20,7 +20,7 @@ from save_results import save_results
 from lhs_method import generate_lhs_samples
 
 def main():
-
+    
     # Setting seeds for different libraries
     random.seed(42)       # Python's built-in random module
     np.random.seed(42)    # NumPy library
@@ -53,7 +53,13 @@ def main():
 
         # Generate LHS samples
         lhs_samples = generate_lhs_samples(dimensions, num_samples)
-        parameter_combinations = lhs_samples
+        parameter_combinations = []
+        # Adapt combinations to have worker counts up to thread counts
+        for sample in lhs_samples:
+            num_threads_idx = sample[0]
+            valid_worker_indices = [i for i, count in enumerate(worker_counts) if count <= thread_counts[num_threads_idx]]
+            worker_idx = random.choice(valid_worker_indices)
+            parameter_combinations.append((num_threads_idx, worker_idx) + tuple(sample[2:]))
     else:
         # Full grid search
         parameter_combinations = list(itertools.product(thread_counts, worker_counts, epochs_options, batch_sizes, training_sizes))
@@ -78,10 +84,7 @@ def main():
         else:
             num_threads, num_workers, epochs, batch_size, training_size = combination
 
-        # Ensure DataLoader's num_workers does not exceed the set number of threads
-        num_workers = min(num_workers, num_threads)
-
-        torch.set_num_threads(num_threads)  # Set the number of threads for PyTorch processes
+        torch.set_num_threads(num_threads)   # Set the number of threads as per the LHS sample
 
         for device_name in devices:
             for net_type, model_class in net_classes.items():
@@ -138,7 +141,7 @@ def main():
                     total_elapsed_time = time.time() - start_all_tests_time
                     current_test += 1
                     print(f"Test {current_test} of {total_tests} on device: {device_name}, net_type: {net_type}, "
-                          f"threads: {num_threads}, workers: {num_workers}, epochs: {epochs}, batch size: {batch_size}, "
+                          f"PyTorch threads: {num_threads}, DataLoader workers: {num_workers}, epochs: {epochs}, batch size: {batch_size}, "
                           f"training size: {training_size}, repetition: {rep + 1} ended after {current_test_duration:.2f} seconds.")
                     print(f"Total time elapsed since first test: {total_elapsed_time:.2f} seconds.")
 
