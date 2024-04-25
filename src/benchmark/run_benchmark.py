@@ -20,7 +20,7 @@ from save_results import save_results
 from lhs_method import generate_lhs_samples
 
 def main():
-    
+
     # Setting seeds for different libraries
     random.seed(42)       # Python's built-in random module
     np.random.seed(42)    # NumPy library
@@ -78,7 +78,10 @@ def main():
         else:
             num_threads, num_workers, epochs, batch_size, training_size = combination
 
-        torch.set_num_threads(num_threads)   # Set the number of threads as per the LHS sample
+        # Ensure DataLoader's num_workers does not exceed the set number of threads
+        num_workers = min(num_workers, num_threads)
+
+        torch.set_num_threads(num_threads)  # Set the number of threads for PyTorch processes
 
         for device_name in devices:
             for net_type, model_class in net_classes.items():
