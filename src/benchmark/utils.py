@@ -1,13 +1,11 @@
-import sys
+import random as rn
+import numpy as np
+import torch
 
-def list_modules(snapshot, message):
-    
-    '''DEPRICATED: This functions works out which libraries are essential for the
-    execution of the benchmarking tool'''
-    
-    current_modules = set(sys.modules.keys())
-    new_modules = current_modules - snapshot
-    print(f"{message} (newly loaded):")
-    for module in sorted(new_modules):
-        print(module)
-    return current_modules
+def set_seed(int):
+    # Setting seeds for different libraries
+    rn.seed(int)       # Python's built-in random module
+    np.random.seed(int)    # NumPy library
+    torch.manual_seed(int) # PyTorch for CPU operations
+    if torch.cuda.is_available(): 
+        torch.cuda.manual_seed_all(int)  # PyTorch for all CUDA devices (GPUs)

@@ -1,7 +1,6 @@
 import time
 import random
 import pandas as pd
-import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -18,15 +17,11 @@ from predict import predict
 from metrics import calculate_metrics
 from save_results import save_results
 from lhs_method import generate_lhs_samples
+from utils import set_seed
 
 def main():
     
-    # Setting seeds for different libraries
-    random.seed(42)       # Python's built-in random module
-    np.random.seed(42)    # NumPy library
-    torch.manual_seed(42) # PyTorch for CPU operations
-    if torch.cuda.is_available(): 
-        torch.cuda.manual_seed_all(42)  # PyTorch for all CUDA devices (GPUs)
+    set_seed(42)
     
     # Configuration and paths
     config = NeuralNetConfig()
@@ -121,6 +116,7 @@ def main():
                         "neural_net_type": net_type,  # Added attribute
                         "repetition": rep + 1,
                         "device": device_name,
+                        "num_threads": num_threads,
                         "num_workers": num_workers,
                         "nn_epochs": epochs,
                         "nn_batch_size": batch_size,
