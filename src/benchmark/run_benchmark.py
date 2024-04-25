@@ -1,4 +1,5 @@
 import time
+import random
 import pandas as pd
 import numpy as np
 import torch
@@ -6,7 +7,8 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader, random_split
 from torch.optim.lr_scheduler import ReduceLROnPlateau
-import orderly
+import itertools
+
 from pyDOE2 import lhs
 from models import FFNN, GRU, LSTM, BiRNN
 from config import NeuralNetConfig
@@ -18,6 +20,14 @@ from save_results import save_results
 from lhs_method import generate_lhs_samples
 
 def main():
+    
+    # Setting seeds for different libraries
+    random.seed(42)       # Python's built-in random module
+    np.random.seed(42)    # NumPy library
+    torch.manual_seed(42) # PyTorch for CPU operations
+    if torch.cuda.is_available(): 
+        torch.cuda.manual_seed_all(42)  # PyTorch for all CUDA devices (GPUs)
+    
     # Configuration and paths
     config = NeuralNetConfig()
     dataframe = pd.read_pickle("data.pkl")
@@ -34,28 +44,41 @@ def main():
     net_classes = {"FFNN": FFNN, "GRU": GRU, "LSTM": LSTM, "BiRNN": BiRNN}
     repetitions = 2
 
-    # Define dimensions lengths for LHS (excluding device, network type, and repetitions)
-    dimensions = [len(thread_counts), len(worker_counts), len(epochs_options), len(batch_sizes), len(training_sizes)]
-    num_samples = 100  # Define the number of LHS samples you want
+    use_lhs = True  # Toggle this to switch between LHS and full grid search
+
+    if use_lhs:
+        # Define dimensions lengths for LHS (excluding device, network type, and repetitions)
+        dimensions = [len(thread_counts), len(worker_counts), len(epochs_options), len(batch_sizes), len(training_sizes)]
+        num_samples = 100  # Define the number of LHS samples you want
+
+        # Generate LHS samples
+        lhs_samples = generate_lhs_samples(dimensions, num_samples)
+        parameter_combinations = lhs_samples
+    else:
+        # Full grid search
+        parameter_combinations = list(itertools.product(thread_counts, worker_counts, epochs_options, batch_sizes, training_sizes))
+        num_samples = len(parameter_combinations)  # This now represents the total combinations in grid search
 
     # Calculate total number of tests
     total_tests = num_samples * len(devices) * len(net_classes) * repetitions
 
-    # Generate LHS samples
-    lhs_samples = generate_lhs_samples(dimensions, num_samples)
-
     # Timing overall tests
     start_all_tests_time = time.time()
 
-    # Iterate over LHS samples
-    for sample in lhs_samples:
-        num_threads = thread_counts[sample[0]]
-        num_workers = worker_counts[sample[1]]
-        epochs = epochs_options[sample[2]]
-        batch_size = batch_sizes[sample[3]]
-        training_size = training_sizes[sample[4]]
+    # Iterate over parameter combinations
+    for combination in parameter_combinations:
+        if use_lhs:
+            num_threads, num_workers, epochs, batch_size, training_size = [
+                thread_counts[combination[0]],
+                worker_counts[combination[1]],
+                epochs_options[combination[2]],
+                batch_sizes[combination[3]],
+                training_sizes[combination[4]],
+            ]
+        else:
+            num_threads, num_workers, epochs, batch_size, training_size = combination
 
-        torch.set_num_threads(num_threads)  # Set the number of threads as per the LHS sample
+        torch.set_num_threads(num_threads)   # Set the number of threads as per the LHS sample
 
         for device_name in devices:
             for net_type, model_class in net_classes.items():
