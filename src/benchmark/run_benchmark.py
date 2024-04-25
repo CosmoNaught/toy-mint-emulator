@@ -111,8 +111,11 @@ def main():
                     current_test_duration = time.time() - start_test_time
                     total_elapsed_time = time.time() - start_all_tests_time
                     current_test += 1
-                    print(f"Test {current_test} of {total_tests} ended after {current_test_duration:.2f} seconds.")
+                    print(f"Test {current_test} of {total_tests} on device: {device_name}, net_type: {net_type}, "
+                          f"threads: {num_threads}, workers: {num_workers}, epochs: {epochs}, batch size: {batch_size}, "
+                          f"training size: {training_size}, repetition: {rep + 1} ended after {current_test_duration:.2f} seconds.")
                     print(f"Total time elapsed since first test: {total_elapsed_time:.2f} seconds.")
+
 
     # Optionally, save final results with a different name to indicate completion
     final_results_df = pd.DataFrame(results)
