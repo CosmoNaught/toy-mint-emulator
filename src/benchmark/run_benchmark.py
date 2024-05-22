@@ -112,7 +112,6 @@ def main():
                     mae, mse, rmse, r2 = calculate_metrics(predictions, actual)
                     
                     results.append({
-                        "num_threads": num_threads,
                         "neural_net_type": net_type,  # Added attribute
                         "repetition": rep + 1,
                         "device": device_name,
