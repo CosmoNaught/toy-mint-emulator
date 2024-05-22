@@ -2,7 +2,10 @@
 import orderly
 from run_post import main
 
+debug = True
+
 if __name__ == "__main__":
-    orderly.dependency(None, "latest(name == 'benchmark')",
-                    {"experiment_results_final.csv" : "experiment_results_final.csv"}) 
+    if debug == False:
+        orderly.dependency(None, "latest(name == 'benchmark')",
+                        {"experiment_results_final.csv" : "experiment_results_final.csv"}) 
     main()
